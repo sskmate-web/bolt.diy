@@ -2,8 +2,9 @@
  * @ts-nocheck
  * Preventing TS checks with files presented in the video for a better presentation.
  */
-import type { JSONValue, Message } from 'ai';
-import React, { type RefCallback, useEffect, useState } from 'react';
+import type { Message, JSONValue } from 'ai';
+import type { RefCallback } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
@@ -149,9 +150,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setProgressAnnotations(progressList);
       }
     }, [data]);
-    useEffect(() => {
-      console.log(transcript);
-    }, [transcript]);
+  //  useEffect(() => {
+  //    console.log(transcript);
+  //  }, [transcript]);
 
     useEffect(() => {
       onStreamingChange?.(isStreaming);
@@ -159,8 +160,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
     useEffect(() => {
       if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const recognition = new SpeechRecognition();
+        const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognitionCtor();
         recognition.continuous = true;
         recognition.interimResults = true;
 
@@ -408,7 +409,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                 {progressAnnotations && <ProgressCompilation data={progressAnnotations} />}
                 <div
                   className={classNames(
-                    'relative bg-bolt-elements-background-depth-2 p-3 rounded-lg border border-bolt-elements-borderColor relative w-full max-w-chat mx-auto z-prompt',
+                    'relative bg-bolt-elements-background-depth-2 p-3 rounded-lg border border-bolt-elements-borderColor w-full max-w-chat mx-auto z-prompt',
 
                     /*
                      * {
@@ -460,7 +461,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           />
                           {(providerList || []).length > 0 &&
                             provider &&
-                            (!LOCAL_PROVIDERS.includes(provider.name) || 'OpenAILike') && (
+                            (!LOCAL_PROVIDERS.includes(provider.name) || provider.name === 'OpenAILike') && (
                               <APIKeyManager
                                 provider={provider}
                                 apiKey={apiKeys[provider.name] || ''}
@@ -692,6 +693,6 @@ function ScrollToBottom() {
         Go to last message
         <span className="i-ph:arrow-down animate-bounce" />
       </button>
-    )
+    ) 
   );
 }

@@ -10,6 +10,7 @@ import { RepositorySelectionDialog } from '~/components/@settings/tabs/connectio
 import { classNames } from '~/utils/classNames';
 import { Button } from '~/components/ui/Button';
 import type { IChatMetadata } from '~/lib/persistence/db';
+import { ClientOnly } from 'remix-utils/client-only';
 
 const IGNORE_PATTERNS = [
   'node_modules/**',
@@ -42,15 +43,13 @@ interface GitCloneButtonProps {
   importChat?: (description: string, messages: Message[], metadata?: IChatMetadata) => Promise<void>;
 }
 
-export default function GitCloneButton({ importChat, className }: GitCloneButtonProps) {
+function GitCloneButtonClient({ importChat, className }: GitCloneButtonProps) {
   const { ready, gitClone } = useGit();
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleClone = async (repoUrl: string) => {
-    if (!ready) {
-      return;
-    }
+    if (!ready) return;
 
     setLoading(true);
 
@@ -63,12 +62,12 @@ export default function GitCloneButton({ importChat, className }: GitCloneButton
 
         let totalSize = 0;
         const skippedFiles: string[] = [];
-        const fileContents = [];
+        const fileContents: { path: string; content: string }[] = [];
 
         for (const filePath of filePaths) {
           const { data: content, encoding } = data[filePath];
 
-          // Skip binary files
+          // Skip binary files allow common text/code ext)
           if (
             content instanceof Uint8Array &&
             !filePath.match(/\.(txt|md|astro|mjs|js|jsx|ts|tsx|json|html|css|scss|less|yml|yaml|xml|svg|vue|svelte)$/i)
@@ -79,11 +78,11 @@ export default function GitCloneButton({ importChat, className }: GitCloneButton
 
           try {
             const textContent =
-              encoding === 'utf8' ? content : content instanceof Uint8Array ? textDecoder.decode(content) : '';
+              encoding === 'utf8' ? (content as string) : content instanceof Uint8Array ? textDecoder.decode(content) : '';
 
-            if (!textContent) {
+            if (!textContent) 
               continue;
-            }
+            
 
             // Check file size
             const fileSize = new TextEncoder().encode(textContent).length;
@@ -136,7 +135,7 @@ ${escapeBoltTags(file.content)}
           createdAt: new Date(),
         };
 
-        const messages = [filesMessage];
+        const messages : Message[] = [filesMessage];
 
         if (commandsMessage) {
           messages.push(commandsMessage);
@@ -180,3 +179,28 @@ ${escapeBoltTags(file.content)}
     </>
   );
 }
+
+
+// ✅ 기본 export: SSR에선 fallback만, CSR에서만 실제 버튼 렌더
+export default function GitCloneButton(props: GitCloneButtonProps) {
+  return (
+    <ClientOnly
+      fallback={
+        <Button
+          title="Clone a Git Repo"
+          variant="default"
+          size="lg"
+          disabled
+          className="gap-2 h-10 px-4 py-2 min-w-[120px] justify-center opacity-60"
+        >
+          <span className="i-ph:git-branch w-4 h-4" />
+          Clone a Git Repo
+        </Button>
+      }
+
+    >
+      {() => <GitCloneButtonClient {...props} />}
+    </ClientOnly>
+  );
+}
+

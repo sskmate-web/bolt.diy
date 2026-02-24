@@ -1,24 +1,33 @@
+// uno.config.ts
+
 import { globSync } from 'fast-glob';
-import fs from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { defineConfig, presetIcons, presetUno, transformerDirectives } from 'unocss';
+import si from '@iconify-json/si/icons.json';
+import ph from '@iconify-json/ph/icons.json';
+import svgSpinners from '@iconify-json/svg-spinners/icons.json';
 
+// ───────────────────────────────────────────────────────────────────────────────
+// 1) 커스텀 SVG 아이콘 컬렉션 (./icons/*.svg → 컬렉션 이름: 'bolt')
+// ───────────────────────────────────────────────────────────────────────────────
 const iconPaths = globSync('./icons/*.svg');
-
 const collectionName = 'bolt';
 
 const customIconCollection = iconPaths.reduce(
   (acc, iconPath) => {
     const [iconName] = basename(iconPath).split('.');
-
     acc[collectionName] ??= {};
-    acc[collectionName][iconName] = async () => fs.readFile(iconPath, 'utf8');
-
+    // preset-icons는 각 아이콘을 문자열 또는 () => string | Promise<string> 로더로 받습니다.
+    acc[collectionName][iconName] = async () => readFile(iconPath, 'utf8');
     return acc;
   },
   {} as Record<string, Record<string, () => Promise<string>>>,
 );
 
+// ───────────────────────────────────────────────────────────────────────────────
+// 2) 색상 팔레트 준비
+// ───────────────────────────────────────────────────────────────────────────────
 const BASE_COLORS = {
   white: '#FFFFFF',
   gray: {
@@ -34,6 +43,7 @@ const BASE_COLORS = {
     900: '#171717',
     950: '#0A0A0A',
   },
+  black: '#000000',
   accent: {
     50: '#F8F5FF',
     100: '#F0EBFF',
@@ -85,7 +95,18 @@ const BASE_COLORS = {
     900: '#7F1D1D',
     950: '#450A0A',
   },
-};
+} as const;
+
+function generateAlphaPalette(hex: string) {
+  return [1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].reduce(
+    (acc, opacity) => {
+      const alpha = Math.round((opacity / 100) * 255).toString(16).padStart(2, '0');
+      acc[opacity] = `${hex}${alpha}`;
+      return acc;
+    },
+    {} as Record<number, string>,
+  );
+}
 
 const COLOR_PRIMITIVES = {
   ...BASE_COLORS,
@@ -97,21 +118,37 @@ const COLOR_PRIMITIVES = {
   },
 };
 
+// ───────────────────────────────────────────────────────────────────────────────
+// 3) UnoCSS 설정
+// ───────────────────────────────────────────────────────────────────────────────
 export default defineConfig({
-  safelist: [...Object.keys(customIconCollection[collectionName] || {}).map((x) => `i-bolt:${x}`)],
+  safelist: [
+    // 커스텀 SVG 아이콘 자동 등록: i-bolt:<iconName>
+    ...Object.keys(customIconCollection[collectionName] || {}).map((x) => `i-bolt:${x}`),
+
+    // 외부 아이콘: 실제로 쓰는 것만 남겨도 됩니다.
+    'i-si:vercel',
+    'i-si:supabase',
+    'i-si:netlify',
+    'i-ph:filter-duotone',
+    'i-svg-spinners:90-ring-with-bg',
+  ],
+
   shortcuts: {
     'bolt-ease-cubic-bezier': 'ease-[cubic-bezier(0.4,0,0.2,1)]',
     'transition-theme': 'transition-[background-color,border-color,color] duration-150 bolt-ease-cubic-bezier',
     kdb: 'bg-bolt-elements-code-background text-bolt-elements-code-text py-1 px-1.5 rounded-md',
     'max-w-chat': 'max-w-[var(--chat-max-width)]',
   },
+
   rules: [
     /**
-     * This shorthand doesn't exist in Tailwind and we overwrite it to avoid
-     * any conflicts with minified CSS classes.
+     * Tailwind의 축약어와 충돌 방지 목적의 placeholder rule
+     * (실제 스타일은 덮어써도/삭제해도 됩니다)
      */
     ['b', {}],
   ],
+
   theme: {
     colors: {
       ...COLOR_PRIMITIVES,
@@ -229,7 +266,9 @@ export default defineConfig({
       },
     },
   },
+
   transformers: [transformerDirectives()],
+
   presets: [
     presetUno({
       dark: {
@@ -238,42 +277,19 @@ export default defineConfig({
       },
     }),
     presetIcons({
-      warn: true,
+      warn: false, // 콘솔 경고 줄이기(원하면 true로)
       collections: {
-        ...customIconCollection,
+        ...customIconCollection,     // i-bolt:*
+        si,                          // i-si:*
+        ph,                          // i-ph:*
+        'svg-spinners': svgSpinners, // i-svg-spinners:*
       },
       unit: 'em',
+      scale: 1.2, // (선택) 아이콘 기본 크기 보정
+      extraProperties: {
+        display: 'inline-block',
+        'vertical-align': 'middle',
+      },
     }),
   ],
 });
-
-/**
- * Generates an alpha palette for a given hex color.
- *
- * @param hex - The hex color code (without alpha) to generate the palette from.
- * @returns An object where keys are opacity percentages and values are hex colors with alpha.
- *
- * Example:
- *
- * ```
- * {
- *   '1': '#FFFFFF03',
- *   '2': '#FFFFFF05',
- *   '3': '#FFFFFF08',
- * }
- * ```
- */
-function generateAlphaPalette(hex: string) {
-  return [1, 2, 3, 4, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].reduce(
-    (acc, opacity) => {
-      const alpha = Math.round((opacity / 100) * 255)
-        .toString(16)
-        .padStart(2, '0');
-
-      acc[opacity] = `${hex}${alpha}`;
-
-      return acc;
-    },
-    {} as Record<number, string>,
-  );
-}

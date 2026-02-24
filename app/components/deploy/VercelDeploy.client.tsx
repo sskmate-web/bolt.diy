@@ -2,7 +2,7 @@ import { toast } from 'react-toastify';
 import { useStore } from '@nanostores/react';
 import { vercelConnection } from '~/lib/stores/vercel';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { webcontainer } from '~/lib/webcontainer';
+import { getWebContainer } from '~/lib/webcontainer';
 import { path } from '~/utils/path';
 import { useState } from 'react';
 import type { ActionCallbackData } from '~/lib/runtime/message-parser';
@@ -28,7 +28,6 @@ export function useVercelDeploy() {
       setIsDeploying(true);
 
       const artifact = workbenchStore.firstArtifact;
-
       if (!artifact) {
         throw new Error('No active project found');
       }
@@ -76,8 +75,8 @@ export function useVercelDeploy() {
       // Notify that build succeeded and deployment is starting
       deployArtifact.runner.handleDeployAction('deploying', 'running', { source: 'vercel' });
 
-      // Get the build files
-      const container = await webcontainer;
+      // Get the build files (CSR 시점에서만 WebContainer 초기화)
+      const wc = await getWebContainer();
 
       // Remove /home/project from buildPath if it exists
       const buildPath = artifact.runner.buildOutput.path.replace('/home/project', '');
@@ -93,15 +92,13 @@ export function useVercelDeploy() {
 
       for (const dir of commonOutputDirs) {
         try {
-          await container.fs.readdir(dir);
+          await wc.fs.readdir(dir);
           finalBuildPath = dir;
           buildPathExists = true;
           console.log(`Using build directory: ${finalBuildPath}`);
           break;
         } catch (error) {
           console.log(`Directory ${dir} doesn't exist, trying next option. ${error}`);
-
-          // Directory doesn't exist, try the next one
           continue;
         }
       }
@@ -113,13 +110,13 @@ export function useVercelDeploy() {
       // Get all files recursively
       async function getAllFiles(dirPath: string): Promise<Record<string, string>> {
         const files: Record<string, string> = {};
-        const entries = await container.fs.readdir(dirPath, { withFileTypes: true });
+        const entries = await wc.fs.readdir(dirPath, { withFileTypes: true });
 
         for (const entry of entries) {
           const fullPath = path.join(dirPath, entry.name);
 
           if (entry.isFile()) {
-            const content = await container.fs.readFile(fullPath, 'utf-8');
+            const content = await wc.fs.readFile(fullPath, 'utf-8');
 
             // Remove build path prefix from the path
             const deployPath = fullPath.replace(finalBuildPath, '');

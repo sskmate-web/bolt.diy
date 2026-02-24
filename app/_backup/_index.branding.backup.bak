@@ -1,14 +1,14 @@
-import type { MetaFunction } from '@remix-run/cloudflare';
+import type { MetaFunction } from '@remix-run/node';
 import { ChefHat, Star, Medal, Utensils } from 'lucide-react';
-import { ClientOnly } from 'remix-utils/client-only';
-import StudioSplitClient from '~/components/studio/StudioSplit.client';
-import { useState, type CSSProperties } from 'react';
+import { useState } from 'react';
 
-export const meta: MetaFunction = () => [
+export const meta: MetaFunction = () => {
+  return [
     { title: 'K-STREET | 40년 명장의 프리미엄 라면' },
     { name: 'description', content: '40년 집념으로 완성한 단 한 그릇. 문희권 총괄 셰프의 프리미엄 K-라면' },
   ];
-     
+};
+
 const MENU_DATA = [
   {
     category: 'Signature',
@@ -207,7 +207,7 @@ const MENU_DATA = [
 
 export default function Index() {
   const [activeTab, setActiveTab] = useState('Signature');
-  const activeItems = MENU_DATA.find((c) => c.category === activeTab)?.items ?? [];
+
   return (
     <div className="min-h-screen bg-[#0C0C0C] text-[#F5EFE7] font-sans selection:bg-[#C6A56A] selection:text-black">
       {/* 1. Global Navigation Bar (GNB) */}
@@ -241,9 +241,6 @@ export default function Index() {
             </a>
             <a href="#menu" className="hover:text-[#C6A56A] transition-colors">
               Menu
-            </a>
-            <a href="#studio" className="hover:text-[#C6A56A] transition-colors">
-              Studio
             </a>
             <a href="#franchise" className="hover:text-[#C6A56A] transition-colors text-[#7A1F1F]">
               Franchise
@@ -355,7 +352,8 @@ export default function Index() {
           </div>
         </div>
       </section>
-          {/* ✨ 4. 회사 인사말 (Company Greeting) - 업로드된 가치를 통합한 새로운 섹션 */}
+
+      {/* ✨ 4. 회사 인사말 (Company Greeting) - 업로드된 가치를 통합한 새로운 섹션 */}
       <section id="message" className="py-32 px-6 bg-[#1A1A1A]">
         <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row gap-16 items-start">
@@ -401,87 +399,54 @@ export default function Index() {
       </section>
 
       {/* 5. Menu Section */}
-     <section id="menu" className="py-32 px-6">
+      <section id="menu" className="py-32 px-6">
         <div className="max-w-7xl mx-auto">
-           <div className="text-center mb-20">
-             <h2 className="text-[#C6A56A] font-serif italic text-5xl mb-4">Our Menu</h2>
-
-             <div className="flex justify-center gap-6 md:gap-12 mt-12 border-b border-white/5 pb-6 overflow-x-auto no-scrollbar">
-        {MENU_DATA.map((cat) => (
-          <button
-            key={cat.category}
-            onClick={() => setActiveTab(cat.category)}
-            className={`text-xs uppercase tracking-[0.3em] font-bold whitespace-nowrap transition-all ${
-              activeTab === cat.category
-                ? 'text-[#C6A56A] scale-110'
-                : 'text-gray-600 hover:text-gray-400'
-            }`}
-          >
-            {cat.category}
-          </button>
-        ))}
-      </div>
-    </div>
-
-    <div className="grid md:grid-cols-2 gap-x-16 gap-y-20">
-      {activeItems.map((item, idx) => (
-        <div
-          key={idx}
-          className="group flex flex-col sm:flex-row gap-8 items-center sm:items-start border-b border-white/5 pb-12"
-        >
-          <div className="w-40 h-40 shrink-0 overflow-hidden border border-[#C6A56A]/20">
-            <img
-              src={item.img}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-              alt={item.nameKr}
-            />
-          </div>
-
-          <div className="grow w-full">
-            <div className="flex justify-between items-end mb-3">
-              <div className="flex flex-col gap-1">
-                <h3 className="text-[#F5EFE7] text-2xl font-bold tracking-tighter">
-                  {item.nameKr}
-                </h3>
-                <p className="text-[#C6A56A] text-xs font-medium uppercase tracking-widest">
-                  {item.nameVn}
-                </p>
-              </div>
-
-              <span className="text-[#C6A56A] font-serif italic text-xl">
-                {item.price}
-              </span>
+          <div className="text-center mb-20">
+            <h2 className="text-[#C6A56A] font-serif italic text-5xl mb-4">Our Menu</h2>
+            <div className="flex justify-center gap-6 md:gap-12 mt-12 border-b border-white/5 pb-6 overflow-x-auto no-scrollbar">
+              {MENU_DATA.map((cat) => (
+                <button
+                  key={cat.category}
+                  onClick={() => setActiveTab(cat.category)}
+                  className={`text-xs uppercase tracking-[0.3em] font-bold whitespace-nowrap transition-all ${activeTab === cat.category ? 'text-[#C6A56A] scale-110' : 'text-gray-600 hover:text-gray-400'}`}
+                >
+                  {cat.category}
+                </button>
+              ))}
             </div>
-
-            <p className="text-gray-400 text-sm font-light leading-relaxed italic border-l border-[#C6A56A]/30 pl-4">
-              {item.desc}
-            </p>
           </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
 
-     {/* ✅ Studio Section (Menu 다음) */}
-      <section
-        id="studio"
-        className="h-screen pt-20 min-h-0 border-y border-white/10 bg-black scroll-mt-20"
-        style={{ '--brand-header-height': '80px' } as CSSProperties} 
-       >
-     {/* 고정 네비(80px) 아래 공간만 실제 Studio가 차지하게 */}
-      <div className="h-[calc(100vh-80px)] min-h-0">
-            <ClientOnly
-            fallback={
-               <div className="h-full w-full flex items-center justify-center text-gray-500">
-          Loading studio…
-         </div>
-       }
-       >
-       {() => <StudioSplitClient />}
-            </ClientOnly>
+          <div className="grid md:grid-cols-2 gap-x-16 gap-y-20">
+            {MENU_DATA.find((c) => c.category === activeTab)?.items.map((item, idx) => (
+              <div
+                key={idx}
+                className="group flex flex-col sm:flex-row gap-8 items-center sm:items-start border-b border-white/5 pb-12"
+              >
+                <div className="w-40 h-40 shrink-0 overflow-hidden border border-[#C6A56A]/20">
+                  <img
+                    src={item.img}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    alt={item.nameKr}
+                  />
+                </div>
+                <div className="grow w-full">
+                  <div className="flex justify-between items-end mb-3">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="text-[#F5EFE7] text-2xl font-bold tracking-tighter">{item.nameKr}</h3>
+                      <p className="text-[#C6A56A] text-xs font-medium uppercase tracking-widest">{item.nameVn}</p>
+                    </div>
+                    <span className="text-[#C6A56A] font-serif italic text-xl">{item.price}</span>
+                  </div>
+                  <p className="text-gray-400 text-sm font-light leading-relaxed italic border-l border-[#C6A56A]/30 pl-4">
+                    {item.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
+
       {/* 6. Franchise Section */}
       <section id="franchise" className="py-32 px-6 bg-[#1A1A1A]">
         <div className="max-w-xl mx-auto text-center">

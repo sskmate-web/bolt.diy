@@ -1,5 +1,5 @@
 import { json } from '@remix-run/cloudflare';
-import JSZip from 'jszip';
+import * as JSZip from 'jszip';
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);

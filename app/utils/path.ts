@@ -1,19 +1,23 @@
+// app/utils/path.ts
 // Browser-compatible path utilities
-import type { ParsedPath } from 'path';
-import pathBrowserify from 'path-browserify';
+
+import type { ParsedPath } from 'node:path'
+import * as pathBrowserify from 'path-browserify'
 
 /**
- * A browser-compatible path utility that mimics Node's path module
- * Using path-browserify for consistent behavior in browser environments
+ * 브라우저 환경에서 Node의 path API와 동일한 시그니처 제공
+ * 사용처는 기존처럼 `import { path } from '~/utils/path'` 또는 '/app/utils/path.ts' 로 사용 가능
  */
 export const path = {
-  join: (...paths: string[]): string => pathBrowserify.join(...paths),
-  dirname: (path: string): string => pathBrowserify.dirname(path),
-  basename: (path: string, ext?: string): string => pathBrowserify.basename(path, ext),
-  extname: (path: string): string => pathBrowserify.extname(path),
-  relative: (from: string, to: string): string => pathBrowserify.relative(from, to),
-  isAbsolute: (path: string): boolean => pathBrowserify.isAbsolute(path),
-  normalize: (path: string): string => pathBrowserify.normalize(path),
-  parse: (path: string): ParsedPath => pathBrowserify.parse(path),
-  format: (pathObject: ParsedPath): string => pathBrowserify.format(pathObject),
-} as const;
+  join: (...paths: string[]) => pathBrowserify.join(...paths),
+  dirname: (p: string) => pathBrowserify.dirname(p),
+  basename: (p: string, ext?: string) => pathBrowserify.basename(p, ext),
+  extname: (p: string) => pathBrowserify.extname(p),
+  relative: (from: string, to: string) => pathBrowserify.relative(from, to),
+  isAbsolute: (p: string): boolean => pathBrowserify.isAbsolute(p),
+  normalize: (p: string) => pathBrowserify.normalize(p),
+  parse: (p: string): ParsedPath => pathBrowserify.parse(p),
+  format: (po: ParsedPath) => pathBrowserify.format(po),
+} as const
+
+export type { ParsedPath }

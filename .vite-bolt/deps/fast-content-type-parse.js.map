@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../app/shims/fast-content-type-parse.ts"],
+  "sourcesContent": ["// app/shims/fast-content-type-parse.ts\r\nimport * as mod from 'fast-content-type-parse';\r\n\r\n// eslint-disable-next-line @typescript-eslint/no-explicit-any\r\nconst m: any = (mod as any)?.default ?? mod;\r\n\r\nexport const parse =\r\n  m?.parse ??\r\n  ((..._args: unknown[]) => {\r\n    throw new Error('fast-content-type-parse.parse is not available at runtime');\r\n  });\r\n\r\nexport const safeParse =\r\n  m?.safeParse ??\r\n  ((..._args: unknown[]) => {\r\n    throw new Error('fast-content-type-parse.safeParse is not available at runtime');\r\n  });\r\n\r\nexport default m;"],
+  "mappings": ";;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,IAAAA,eAAA;AAAA,IAAAA,eAAA;AAIA,IAAM,KAAU,mFAAa,YAAW;AAEjC,IAAM,SACX,uBAAG,WACF,IAAI,UAAqB;AACxB,QAAM,IAAI,MAAM,2DAA2D;AAC7E;AAEK,IAAM,aACX,uBAAG,eACF,IAAI,UAAqB;AACxB,QAAM,IAAI,MAAM,+DAA+D;AACjF;AAEF,IAAO,kCAAQ;",
+  "names": ["import_dist"]
+}

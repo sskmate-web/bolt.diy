@@ -2,43 +2,41 @@ import type { LoaderFunction } from '@remix-run/cloudflare';
 import { LLMManager } from '~/lib/modules/llm/manager';
 import { getApiKeysFromCookie } from '~/lib/api/cookies';
 
+console.log('[api.export-api-keys] module loaded');
+
 export const loader: LoaderFunction = async ({ context, request }) => {
-  // Get API keys from cookie
+  console.log('[api.export-api-keys] loader start');
+
   const cookieHeader = request.headers.get('Cookie');
   const apiKeysFromCookie = getApiKeysFromCookie(cookieHeader);
 
-  // Initialize the LLM manager to access environment variables
+  // LLMManager init (이미 앱 시작 시 찍히는 로그가 있으니 보통 안전)
   const llmManager = LLMManager.getInstance(context?.cloudflare?.env as any);
-
-  // Get all provider instances to find their API token keys
   const providers = llmManager.getAllProviders();
 
-  // Create a comprehensive API keys object
+  // 여기서는 "값(키)"을 모으되, 응답에는 절대 실 키를 내보내지 않음
   const apiKeys: Record<string, string> = { ...apiKeysFromCookie };
 
-  // For each provider, check all possible sources for API keys
   for (const provider of providers) {
-    if (!provider.config.apiTokenKey) {
-      continue;
-    }
+    if (!provider.config.apiTokenKey) continue;
 
     const envVarName = provider.config.apiTokenKey;
+    if (apiKeys[provider.name]) continue;
 
-    // Skip if we already have this provider's key from cookies
-    if (apiKeys[provider.name]) {
-      continue;
-    }
-
-    // Check environment variables in order of precedence
     const envValue =
       (context?.cloudflare?.env as Record<string, any>)?.[envVarName] ||
       process.env[envVarName] ||
-      llmManager.env[envVarName];
+      (llmManager as any).env?.[envVarName];
 
-    if (envValue) {
-      apiKeys[provider.name] = envValue;
-    }
+    if (envValue) apiKeys[provider.name] = String(envValue);
   }
 
-  return Response.json(apiKeys);
+  // ✅ 안전 반환: provider별로 "set"만 내려보냄 (실 키 노출 X)
+  const redacted: Record<string, string> = {};
+  for (const name of Object.keys(apiKeys)) {
+    redacted[name] = 'set';
+  }
+
+  console.log('[api.export-api-keys] returning providers:', Object.keys(redacted));
+  return Response.json(redacted);
 };

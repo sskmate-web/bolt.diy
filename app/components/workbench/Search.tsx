@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import type { TextSearchOptions, TextSearchOnProgressCallback, WebContainer } from '@webcontainer/api';
 import { workbenchStore } from '~/lib/stores/workbench';
-import { webcontainer } from '~/lib/webcontainer';
+import { getWebContainer } from '~/lib/webcontainer';
 import { WORK_DIR } from '~/utils/constants';
 import { debounce } from '~/utils/debounce';
 
@@ -21,7 +21,6 @@ async function performTextSearch(
 ): Promise<void> {
   if (!instance || typeof instance.internal?.textSearch !== 'function') {
     console.error('WebContainer instance not available or internal searchText method is missing/not a function.');
-
     return;
   }
 
@@ -33,10 +32,10 @@ async function performTextSearch(
   const progressCallback: TextSearchOnProgressCallback = (filePath: any, apiMatches: any[]) => {
     const displayMatches: DisplayMatch[] = [];
 
-    apiMatches.forEach((apiMatch: { preview: { text: string; matches: string | any[] }; ranges: any[] }) => {
+    apiMatches.forEach((apiMatch: { preview: { text: string; matches: any[] }; ranges: any[] }) => {
       const previewLines = apiMatch.preview.text.split('\n');
 
-      apiMatch.ranges.forEach((range: { startLineNumber: number; startColumn: any; endColumn: any }) => {
+      apiMatch.ranges.forEach((range: { startLineNumber: number; startColumn: number; endColumn: number }) => {
         let previewLineText = '(Preview line not found)';
         let lineIndexInPreview = -1;
 
@@ -74,18 +73,11 @@ async function performTextSearch(
 }
 
 function groupResultsByFile(results: DisplayMatch[]): Record<string, DisplayMatch[]> {
-  return results.reduce(
-    (acc, result) => {
-      if (!acc[result.path]) {
-        acc[result.path] = [];
-      }
-
-      acc[result.path].push(result);
-
-      return acc;
-    },
-    {} as Record<string, DisplayMatch[]>,
-  );
+  return results.reduce((acc, result) => {
+    if (!acc[result.path]) acc[result.path] = [];
+    acc[result.path].push(result);
+    return acc;
+  }, {} as Record<string, DisplayMatch[]>);
 }
 
 export function Search() {
@@ -113,7 +105,6 @@ export function Search() {
       setIsSearching(false);
       setExpandedFiles({});
       setHasSearched(false);
-
       return;
     }
 
@@ -126,9 +117,11 @@ export function Search() {
     const start = Date.now();
 
     try {
-      const instance = await webcontainer;
+      // ✅ CSR 시점에만 WebContainer 초기화
+      const instance = await getWebContainer();
+
       const options: Omit<TextSearchOptions, 'folders'> = {
-        homeDir: WORK_DIR, // Adjust this path as needed
+        homeDir: WORK_DIR,
         includes: ['**/*.*'],
         excludes: ['**/node_modules/**', '**/package-lock.json', '**/.git/**', '**/dist/**', '**/*.lock'],
         gitignore: true,
@@ -150,7 +143,6 @@ export function Search() {
       console.error('Failed to initiate search:', error);
     } finally {
       const elapsed = Date.now() - start;
-
       if (elapsed < minLoaderTime) {
         setTimeout(() => setIsSearching(false), minLoaderTime - elapsed);
       } else {
@@ -167,13 +159,8 @@ export function Search() {
 
   const handleResultClick = (filePath: string, line?: number) => {
     workbenchStore.setSelectedFile(filePath);
-
-    /*
-     * Adjust line number to be 0-based if it's defined
-     * The search results use 1-based line numbers, but CodeMirrorEditor expects 0-based
-     */
+    // CodeMirror는 0-based, 검색 결과는 1-based → 보정
     const adjustedLine = typeof line === 'number' ? Math.max(0, line - 1) : undefined;
-
     workbenchStore.setCurrentDocumentScrollPosition({ line: adjustedLine, column: 0 });
   };
 
@@ -199,9 +186,11 @@ export function Search() {
             <div className="i-ph:circle-notch animate-spin mr-2" /> Searching...
           </div>
         )}
+
         {!isSearching && hasSearched && searchResults.length === 0 && searchQuery.trim() !== '' && (
           <div className="flex items-center justify-center h-32 text-gray-500">No results found.</div>
         )}
+
         {!isSearching &&
           Object.keys(groupedResults).map((file) => (
             <div key={file} className="mb-2">
@@ -218,6 +207,7 @@ export function Search() {
                   {groupedResults[file].length}
                 </span>
               </button>
+
               {expandedFiles[file] && (
                 <div className="">
                   {groupedResults[file].map((match, idx) => {

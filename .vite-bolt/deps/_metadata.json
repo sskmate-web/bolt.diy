@@ -1,0 +1,103 @@
+{
+  "hash": "5d24dd4f",
+  "configHash": "1f8169f7",
+  "lockfileHash": "ca7ede2e",
+  "browserHash": "2a5675e5",
+  "optimized": {
+    "path-browserify": {
+      "src": "../../node_modules/.pnpm/path-browserify@1.0.1/node_modules/path-browserify/index.js",
+      "file": "path-browserify.js",
+      "fileHash": "9f30d7da",
+      "needsInterop": true
+    },
+    "react-toastify": {
+      "src": "../../node_modules/.pnpm/react-toastify@10.0.6_react-dom@18.3.1_react@18.3.1__react@18.3.1/node_modules/react-toastify/dist/react-toastify.esm.mjs",
+      "file": "react-toastify.js",
+      "fileHash": "16517e39",
+      "needsInterop": false
+    },
+    "fast-content-type-parse": {
+      "src": "../../app/shims/fast-content-type-parse.ts",
+      "file": "fast-content-type-parse.js",
+      "fileHash": "6e3b96f9",
+      "needsInterop": false
+    },
+    "jszip": {
+      "src": "../../node_modules/.pnpm/jszip@3.10.1/node_modules/jszip/dist/jszip.min.js",
+      "file": "jszip.js",
+      "fileHash": "c5338007",
+      "needsInterop": true
+    },
+    "file-saver": {
+      "src": "../../node_modules/.pnpm/file-saver@2.0.5/node_modules/file-saver/dist/FileSaver.min.js",
+      "file": "file-saver.js",
+      "fileHash": "0970001a",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/.pnpm/react@18.3.1/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "77f40805",
+      "needsInterop": true
+    },
+    "react/jsx-runtime": {
+      "src": "../../node_modules/.pnpm/react@18.3.1/node_modules/react/jsx-runtime.js",
+      "file": "react_jsx-runtime.js",
+      "fileHash": "ae6bfd4d",
+      "needsInterop": true
+    },
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/.pnpm/react@18.3.1/node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "6ad32f00",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/.pnpm/react-dom@18.3.1_react@18.3.1/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "35a4fbde",
+      "needsInterop": true
+    },
+    "@remix-run/react": {
+      "src": "../../node_modules/.pnpm/@remix-run+react@2.16.3_react-dom@18.3.1_react@18.3.1__react@18.3.1_typescript@5.8.2/node_modules/@remix-run/react/dist/esm/index.js",
+      "file": "@remix-run_react.js",
+      "fileHash": "a25b7435",
+      "needsInterop": false
+    },
+    "buffer": {
+      "src": "../../node_modules/.pnpm/vite-plugin-node-polyfills@0.22.0_rollup@4.38.0_vite@5.4.15_@types+node@22.13.14_sass-embedded@1.86.0_/node_modules/vite-plugin-node-polyfills/shims/buffer/dist/index.js",
+      "file": "buffer.js",
+      "fileHash": "0433a7bc",
+      "needsInterop": false
+    },
+    "vite-plugin-node-polyfills/shims/buffer": {
+      "src": "../../node_modules/.pnpm/vite-plugin-node-polyfills@0.22.0_rollup@4.38.0_vite@5.4.15_@types+node@22.13.14_sass-embedded@1.86.0_/node_modules/vite-plugin-node-polyfills/shims/buffer/dist/index.js",
+      "file": "vite-plugin-node-polyfills_shims_buffer.js",
+      "fileHash": "bfeeb4c8",
+      "needsInterop": false
+    },
+    "vite-plugin-node-polyfills/shims/global": {
+      "src": "../../node_modules/.pnpm/vite-plugin-node-polyfills@0.22.0_rollup@4.38.0_vite@5.4.15_@types+node@22.13.14_sass-embedded@1.86.0_/node_modules/vite-plugin-node-polyfills/shims/global/dist/index.js",
+      "file": "vite-plugin-node-polyfills_shims_global.js",
+      "fileHash": "f95e8f62",
+      "needsInterop": false
+    },
+    "vite-plugin-node-polyfills/shims/process": {
+      "src": "../../node_modules/.pnpm/vite-plugin-node-polyfills@0.22.0_rollup@4.38.0_vite@5.4.15_@types+node@22.13.14_sass-embedded@1.86.0_/node_modules/vite-plugin-node-polyfills/shims/process/dist/index.js",
+      "file": "vite-plugin-node-polyfills_shims_process.js",
+      "fileHash": "9b7be8c7",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-UZXC72BY": {
+      "file": "chunk-UZXC72BY.js"
+    },
+    "chunk-SDKZKQA7": {
+      "file": "chunk-SDKZKQA7.js"
+    },
+    "chunk-DLS533JF": {
+      "file": "chunk-DLS533JF.js"
+    }
+  }
+}

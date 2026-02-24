@@ -1,5 +1,5 @@
 import type { WebContainer } from '@webcontainer/api';
-import { path as nodePath } from '~/utils/path';
+import { path } from '/app/utils/path.ts';
 import { atom, map, type MapStore } from 'nanostores';
 import type { ActionAlert, BoltAction, DeployAlert, FileHistory, SupabaseAction, SupabaseAlert } from '~/types/actions';
 import { createScopedLogger } from '~/utils/logger';
